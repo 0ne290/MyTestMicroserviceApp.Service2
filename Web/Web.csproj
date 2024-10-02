@@ -7,9 +7,17 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Protobuf Include="Protos\warehouse_accounting_service.proto" GrpcServices="Server" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\Core\Application\Application.csproj"/>
         <ProjectReference Include="..\Core\Domain\Domain.csproj"/>
         <ProjectReference Include="..\Infrastructure\Storages\Storages.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Grpc.AspNetCore" Version="2.66.0" />
     </ItemGroup>
 
 </Project>
