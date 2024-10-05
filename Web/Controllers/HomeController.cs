@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using MyTestMicroserviceApp.Service2.Models;
+using Web.Models;
 
-namespace MyTestMicroserviceApp.Service2.Controllers;
+namespace Web.Controllers;
 
 public class HomeController : Controller
 {

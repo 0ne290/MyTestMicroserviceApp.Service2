@@ -1,4 +1,4 @@
-namespace MyTestMicroserviceApp.Service2.Models;
+namespace Web.Models;
 
 public class ErrorViewModel
 {
