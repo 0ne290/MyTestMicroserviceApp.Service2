@@ -1,6 +1,5 @@
 using Application.Commands;
 using Domain.Interfaces;
-using Domain.Validators;
 using FluentResults;
 using MediatR;
 
