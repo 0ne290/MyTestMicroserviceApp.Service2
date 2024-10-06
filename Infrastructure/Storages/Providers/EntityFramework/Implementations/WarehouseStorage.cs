@@ -7,6 +7,9 @@ namespace Storages.Providers.EntityFramework.Implementations;
 
 public class WarehouseStorage(Service2Context dbContext) : IWarehouseStorage
 { 
+    public async Task<ICollection<Warehouse>> GetAll() =>
+        await Task.FromResult(_dbContext.Warehouses.Select(WarehouseMapper.ModelToEntity).ToList());
+    
     public async Task<Result> Insert(Warehouse warehouse)
     {
         await _dbContext.Warehouses.AddAsync(WarehouseMapper.EntityToModel(warehouse));

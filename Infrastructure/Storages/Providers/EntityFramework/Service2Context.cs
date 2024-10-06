@@ -5,7 +5,11 @@ namespace Storages.Providers.EntityFramework;
 
 public sealed class Service2Context : DbContext
 {
-    public Service2Context(DbContextOptions<Service2Context> options) : base(options) => Database.EnsureCreated();
+    public Service2Context(DbContextOptions<Service2Context> options) : base(options)
+    {
+        Database.EnsureDeleted();
+        Database.EnsureCreated();
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

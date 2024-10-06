@@ -9,4 +9,7 @@ public static class ProductMapper
         Guid = entity.Guid, Name = entity.Name, ManufacturerGuid = entity.Manufacturer.Value.Guid,
         ReceiptDate = entity.ReceiptDate, WarehouseGuid = entity.Warehouse.Value.Guid
     };
+    
+    public static Entities.Product ModelToEntity(Models.Product model, Lazy<Entities.Manufacturer> manufacturer, Lazy<Entities.Warehouse> warehouse) =>
+        new(model.Guid, model.Name, manufacturer, model.ReceiptDate, warehouse);
 }
