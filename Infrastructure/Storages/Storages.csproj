@@ -12,6 +12,7 @@
 
     <ItemGroup>
       <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.8" />
+      <PackageReference Include="Riok.Mapperly" Version="3.6.0" />
     </ItemGroup>
 
 </Project>

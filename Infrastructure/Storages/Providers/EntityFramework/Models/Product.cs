@@ -18,8 +18,8 @@ public class Product : BaseModel
 
     public virtual Warehouse? Warehouse { get; set; }
     
-    [ForeignKey(nameof(Supply))]
-    public string? SupplyGuid { get; set; }
+    //[ForeignKey(nameof(Supply))]
+    //public string? SupplyGuid { get; set; }
 
-    public virtual Supply? Supply { get; set; }
+    //public virtual Supply? Supply { get; set; }
 }
