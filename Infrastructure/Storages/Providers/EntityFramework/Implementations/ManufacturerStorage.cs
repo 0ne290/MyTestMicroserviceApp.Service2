@@ -8,8 +8,8 @@ namespace Storages.Providers.EntityFramework.Implementations;
 
 public class ManufacturerStorage(Service2Context dbContext) : IManufacturerStorage
 {
-    public async Task<ICollection<Manufacturer>> GetAll() =>
-        await Task.FromResult(_dbContext.Manufacturers.Select(ManufacturerMapper.ModelToEntity).ToList());
+    public async Task<IEnumerable<Manufacturer>> GetAll() =>
+        await Task.FromResult(_dbContext.Manufacturers.AsNoTracking().AsEnumerable().Select(ManufacturerMapper.ModelToEntity));
     
     public async Task<Result> Insert(Manufacturer manufacturer)
     {

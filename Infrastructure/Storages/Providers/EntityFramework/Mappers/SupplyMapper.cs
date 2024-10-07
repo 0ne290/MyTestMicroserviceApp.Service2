@@ -8,6 +8,6 @@ public static class SupplyMapper
     {
         Guid = entity.Guid, Date = entity.Date, WarehouseGuid = entity.Warehouse.Value.Guid,
         ExternalStoreGuid = entity.ExternalStoreGuid,
-        Products = entity.Products.Select(ProductMapper.EntityToModel).ToList()
+        //Products = entity.Products.Select(ProductMapper.EntityToModel).ToList()
     };
 }

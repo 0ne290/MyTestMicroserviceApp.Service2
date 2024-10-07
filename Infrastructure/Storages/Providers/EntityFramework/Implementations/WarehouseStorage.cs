@@ -1,14 +1,15 @@
 using Domain.Entities;
 using Domain.Interfaces;
 using FluentResults;
+using Microsoft.EntityFrameworkCore;
 using Storages.Providers.EntityFramework.Mappers;
 
 namespace Storages.Providers.EntityFramework.Implementations;
 
 public class WarehouseStorage(Service2Context dbContext) : IWarehouseStorage
 { 
-    public async Task<ICollection<Warehouse>> GetAll() =>
-        await Task.FromResult(_dbContext.Warehouses.Select(WarehouseMapper.ModelToEntity).ToList());
+    public async Task<IEnumerable<Warehouse>> GetAll() =>
+        await Task.FromResult(_dbContext.Warehouses.AsNoTracking().AsEnumerable().Select(WarehouseMapper.ModelToEntity));
     
     public async Task<Result> Insert(Warehouse warehouse)
     {

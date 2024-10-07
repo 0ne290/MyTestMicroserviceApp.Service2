@@ -5,7 +5,7 @@ namespace Domain.Interfaces;
 
 public interface IManufacturerStorage
 {
-    Task<ICollection<Manufacturer>> GetAll();
+    Task<IEnumerable<Manufacturer>> GetAll();
     
     Task<Result> Insert(Manufacturer manufacturer);
     

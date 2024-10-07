@@ -27,7 +27,7 @@ public class ManufacturerStorageTest : IDisposable
                 _faker.Company.CompanyName());
             await _manufacturerStorage.Insert(testManufacturers[i]);
         }
-        var manufacturersFromStorage = await _manufacturerStorage.GetAll();
+        var manufacturersFromStorage = (await _manufacturerStorage.GetAll()).ToList();
         
         for (var i = 0; i < countOfTestManufacturers; i++)
             Assert.Contains(manufacturersFromStorage, m => m.Equals(testManufacturers[i]));

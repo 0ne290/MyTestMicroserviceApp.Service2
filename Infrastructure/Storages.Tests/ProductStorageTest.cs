@@ -6,6 +6,7 @@ using Storages.Providers.EntityFramework.Implementations;
 
 namespace Storages.Tests;
 
+// TODO: Результаты тестирования: глобально отключить отслеживание в хранилищах; если даже с отключенным отслеживанием сущности все равно отслеживаются после методов Update и Insert, добавить в эти методы вызов метода сброса отслеживаемых сущностей; рассмотреть вариант замены методов контекста Update и AddAsync на не отслеживающие аналоги (начни копать с ExecuteUpdate и ExecuteDelete); протестировать хранилище поставок; провести рефакторинг в связи с добавлением в проект асинхронной ленивой загрузки (особенно много рефакторинга требуется в слое хранилищ)
 public class ProductStorageTest : IDisposable
 {
     public ProductStorageTest()
@@ -22,13 +23,15 @@ public class ProductStorageTest : IDisposable
     public async Task Successful_Insert()
     {
         const int countOfTestManufacturers = 8;
-        var testManufacturers = new Manufacturer[countOfTestManufacturers];
+        var testManufacturers = new List<Manufacturer>(countOfTestManufacturers);
         for (var i = 0; i < countOfTestManufacturers; i++)
         {
-            testManufacturers[i] = new Manufacturer(_faker.Random.Guid().ToString(), _faker.Address.FullAddress(),
-                _faker.Company.CompanyName());
+            testManufacturers.Add(new Manufacturer(_faker.Random.Guid().ToString(), _faker.Address.FullAddress(),
+                _faker.Company.CompanyName()));
             await _manufacturerStorage.Insert(testManufacturers[i]);
         }
+        testManufacturers = (await _manufacturerStorage.GetAll()).ToList();
+        
         
         const int countOfTestWarehouses = 6;
         var testWarehouses = new Warehouse[countOfTestWarehouses];
@@ -43,17 +46,43 @@ public class ProductStorageTest : IDisposable
         var testProducts = new Product[countOfTestProducts];
         for (var i = 0; i < countOfTestProducts; i++)
         {
-            testProducts[i] = new Product(_faker.Random.Guid().ToString(), _faker.Commerce.ProductName(), new Lazy<Manufacturer>(() => _faker.Random.ArrayElement(testManufacturers)), _faker.Date.Between(DateTime.Now.AddDays(-7), DateTime.Now.AddDays(7)), new Lazy<Warehouse>(() => _faker.Random.ArrayElement(testWarehouses)));
+            testProducts[i] = new Product(_faker.Random.Guid().ToString(), _faker.Commerce.ProductName(), new Lazy<Task<Manufacturer>>(() => Task.FromResult(_faker.Random.ListItem(testManufacturers))), _faker.Date.Between(DateTime.Now.AddDays(-7), DateTime.Now.AddDays(7)), new Lazy<Task<Warehouse>>(() => Task.FromResult(_faker.Random.ArrayElement(testWarehouses))));
             await _productStorage.Insert(testProducts[i]);
         }
         var productsFromStorage = (await _productStorage.GetAll()).ToList();
         
         for (var i = 0; i < countOfTestProducts; i++)
         {
+            var me = await testProducts[i].Manufacturer.Value;
+            var ma = await productsFromStorage[i].Manufacturer.Value;
+            var we = await testProducts[i].Warehouse.Value;
+            var wa = await productsFromStorage[i].Warehouse.Value;
             Assert.Contains(productsFromStorage, p => p.Equals(testProducts[i]));
-            Assert.Contains(testManufacturers, m => m.Equals(testProducts[i].Manufacturer.Value) && m.Equals(productsFromStorage[i].Manufacturer.Value));
-            Assert.Contains(testWarehouses, w => w.Equals(testProducts[i].Warehouse.Value) && w.Equals(productsFromStorage[i].Warehouse.Value));
+            Assert.Contains(testManufacturers, m => m.Equals(me) && m.Equals(ma));
+            Assert.Contains(testWarehouses, w => w.Equals(we) && w.Equals(wa));
         }
+    }
+
+    [Fact]
+    public async Task Successful_Update()
+    {
+        var product = (await _productStorage.GetAll()).First();
+        var oldManufacturer = await product.Manufacturer.Value;
+        var newManufacturer = new Manufacturer(_faker.Random.Guid().ToString(), _faker.Address.FullAddress(),
+                    _faker.Company.CompanyName());
+        await _manufacturerStorage.Insert(newManufacturer);
+        
+        product.Name = "NewName";
+        await _productStorage.Update(product);
+
+        product.Manufacturer = new Lazy<Task<Manufacturer>>(Task.FromResult(newManufacturer));
+        await _productStorage.Update(product);
+        
+        product = (await _productStorage.GetAll()).First(p => p.Guid == product.Guid);
+        oldManufacturer = (await _manufacturerStorage.GetAll()).First(m => m.Guid == oldManufacturer.Guid);
+        newManufacturer = (await _manufacturerStorage.GetAll()).First(m => m.Guid == newManufacturer.Guid);
+        
+        Assert.Equal(newManufacturer, await product.Manufacturer.Value);
     }
     
     public void Dispose()

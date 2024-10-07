@@ -5,7 +5,7 @@ namespace Domain.Interfaces;
 
 public interface IWarehouseStorage
 {
-    Task<ICollection<Warehouse>> GetAll();
+    Task<IEnumerable<Warehouse>> GetAll();
     
     Task<Result> Insert(Warehouse warehouse);
     

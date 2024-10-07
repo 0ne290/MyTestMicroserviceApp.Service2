@@ -27,7 +27,7 @@ public class WarehouseStorageTest : IDisposable
                 (_faker.Address.Longitude(), _faker.Address.Latitude()));
             await _warehouseStorage.Insert(testWarehouses[i]);
         }
-        var warehousesFromStorage = await _warehouseStorage.GetAll();
+        var warehousesFromStorage = (await _warehouseStorage.GetAll()).ToList();
         
         for (var i = 0; i < countOfTestWarehouses; i++)
             Assert.Contains(warehousesFromStorage, w => w.Equals(testWarehouses[i]));

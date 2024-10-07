@@ -7,7 +7,7 @@ public sealed class Service2Context : DbContext
 {
     public Service2Context(DbContextOptions<Service2Context> options) : base(options)
     {
-        Database.EnsureDeleted();
+        //Database.EnsureDeleted();
         Database.EnsureCreated();
     }
 

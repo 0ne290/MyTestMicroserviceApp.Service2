@@ -4,12 +4,12 @@ namespace Storages.Providers.EntityFramework.Mappers;
 
 public static class ProductMapper
 {
-    public static Models.Product EntityToModel(Entities.Product entity) => new()
+    public static async Task<Models.Product> EntityToModel(Entities.Product entity) => new()
     {
-        Guid = entity.Guid, Name = entity.Name, ManufacturerGuid = entity.Manufacturer.Value.Guid,
-        ReceiptDate = entity.ReceiptDate, WarehouseGuid = entity.Warehouse.Value.Guid
+        Guid = entity.Guid, Name = entity.Name, ManufacturerGuid = (await entity.Manufacturer.Value).Guid,
+        ReceiptDate = entity.ReceiptDate, WarehouseGuid = (await entity.Warehouse.Value).Guid
     };
     
-    public static Entities.Product ModelToEntity(Models.Product model, Lazy<Entities.Manufacturer> manufacturer, Lazy<Entities.Warehouse> warehouse) =>
+    public static Entities.Product ModelToEntity(Models.Product model, Lazy<Task<Entities.Manufacturer>> manufacturer, Lazy<Task<Entities.Warehouse>> warehouse) =>
         new(model.Guid, model.Name, manufacturer, model.ReceiptDate, warehouse);
 }

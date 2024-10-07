@@ -5,7 +5,7 @@ namespace Domain.Interfaces;
 
 public interface IProductStorage
 {
-    Task<ICollection<Product>> GetAll();
+    Task<IEnumerable<Product>> GetAll();
     
     Task<Result> Insert(Product product);
     
