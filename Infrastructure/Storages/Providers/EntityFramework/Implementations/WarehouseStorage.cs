@@ -6,15 +6,24 @@ using Storages.Providers.EntityFramework.Mappers;
 
 namespace Storages.Providers.EntityFramework.Implementations;
 
-public class WarehouseStorage(Service2Context dbContext) : IWarehouseStorage
+public class WarehouseStorage : IWarehouseStorage
 { 
+    public WarehouseStorage(Service2Context dbContext)
+    {
+        _dbContext = dbContext;
+        _dbContext.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTrackingWithIdentityResolution;
+    }
+    
     public async Task<IEnumerable<Warehouse>> GetAll() =>
-        await Task.FromResult(_dbContext.Warehouses.AsNoTracking().AsEnumerable().Select(WarehouseMapper.ModelToEntity));
+        await Task.FromResult(_dbContext.Warehouses.AsEnumerable().Select(WarehouseMapper.ModelToEntity));
+
+    public async Task<Warehouse> GetByGuid(string guid) => WarehouseMapper.ModelToEntity(await _dbContext.Warehouses.SingleAsync(w => w.Guid == guid));
     
     public async Task<Result> Insert(Warehouse warehouse)
     {
         await _dbContext.Warehouses.AddAsync(WarehouseMapper.EntityToModel(warehouse));
         await _dbContext.SaveChangesAsync();
+        _dbContext.ChangeTracker.Clear();
         
         return Result.Ok();
     }
@@ -23,9 +32,10 @@ public class WarehouseStorage(Service2Context dbContext) : IWarehouseStorage
     {
         _dbContext.Update(WarehouseMapper.EntityToModel(warehouse));
         await _dbContext.SaveChangesAsync();
+        _dbContext.ChangeTracker.Clear();
         
         return Result.Ok();
     }
-    
-    private readonly Service2Context _dbContext = dbContext;
+
+    private readonly Service2Context _dbContext;
 }

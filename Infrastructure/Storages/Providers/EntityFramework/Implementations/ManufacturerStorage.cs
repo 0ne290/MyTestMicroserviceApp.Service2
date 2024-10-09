@@ -6,15 +6,25 @@ using Storages.Providers.EntityFramework.Mappers;
 
 namespace Storages.Providers.EntityFramework.Implementations;
 
-public class ManufacturerStorage(Service2Context dbContext) : IManufacturerStorage
+public class ManufacturerStorage : IManufacturerStorage
 {
+    public ManufacturerStorage(Service2Context dbContext)
+    {
+        _dbContext = dbContext;
+        _dbContext.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTrackingWithIdentityResolution;
+    }
+    
     public async Task<IEnumerable<Manufacturer>> GetAll() =>
-        await Task.FromResult(_dbContext.Manufacturers.AsNoTracking().AsEnumerable().Select(ManufacturerMapper.ModelToEntity));
+        await Task.FromResult(_dbContext.Manufacturers.AsEnumerable().Select(ManufacturerMapper.ModelToEntity));
+
+    public async Task<Manufacturer> GetByGuid(string guid) =>
+        ManufacturerMapper.ModelToEntity(await _dbContext.Manufacturers.SingleAsync(m => m.Guid == guid));
     
     public async Task<Result> Insert(Manufacturer manufacturer)
     {
         await _dbContext.Manufacturers.AddAsync(ManufacturerMapper.EntityToModel(manufacturer));
         await _dbContext.SaveChangesAsync();
+        _dbContext.ChangeTracker.Clear();
         
         return Result.Ok();
     }
@@ -23,9 +33,10 @@ public class ManufacturerStorage(Service2Context dbContext) : IManufacturerStora
     {
         _dbContext.Update(ManufacturerMapper.EntityToModel(manufacturer));
         await _dbContext.SaveChangesAsync();
+        _dbContext.ChangeTracker.Clear();
         
         return Result.Ok();
     }
     
-    private readonly Service2Context _dbContext = dbContext;
+    private readonly Service2Context _dbContext;
 }
