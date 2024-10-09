@@ -16,7 +16,7 @@ public sealed class Service2Context : DbContext
         modelBuilder.Entity<Supply>()
             .HasMany(e => e.Products)
             .WithOne()
-            .HasForeignKey("SupplyGuid");
+            .IsRequired(false);
     }
 
     public DbSet<Manufacturer> Manufacturers { get; set; } = null!;
