@@ -3,19 +3,23 @@ using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Storages.Providers.EntityFramework;
 using Storages.Providers.EntityFramework.Implementations;
+using Xunit.Abstractions;
 
 namespace Storages.Tests;
 
-// TODO: Результаты тестирования: протестировать хранилище поставок; провести рефакторинг в связи с добавлением в проект асинхронной ленивой загрузки (особенно много рефакторинга требуется в слое хранилищ)
+// TODO: Результаты тестирования: протестировать хранилище поставок, провести рефакторинг моделей данных
 public class ProductStorageTest : IDisposable
 {
-    public ProductStorageTest()
+    private readonly ITestOutputHelper _testOutputHelper;
+
+    public ProductStorageTest(ITestOutputHelper testOutputHelper)
     {
+        _testOutputHelper = testOutputHelper;
         _dbContext = new Service2Context(new DbContextOptionsBuilder<Service2Context>().UseSqlite("Data Source=./TestDb.db")
             .Options);
-        _productStorage = new ProductStorage(_dbContext);
         _manufacturerStorage = new ManufacturerStorage(_dbContext);
         _warehouseStorage = new WarehouseStorage(_dbContext);
+        _productStorage = new ProductStorage(_dbContext, _manufacturerStorage, _warehouseStorage);
         _faker = new Faker("ru");
     }
     
@@ -67,20 +71,20 @@ public class ProductStorageTest : IDisposable
     public async Task Successful_Update()
     {
         var product = (await _productStorage.GetAll()).First();
-        var oldManufacturer = await product.Manufacturer.Value;
+        _testOutputHelper.WriteLine($"Old manufacturer guid: {(await product.Manufacturer.Value).Guid}");
         var newManufacturer = new Manufacturer(_faker.Random.Guid().ToString(), _faker.Address.FullAddress(),
                     _faker.Company.CompanyName());
         await _manufacturerStorage.Insert(newManufacturer);
         
-        product.Name = "NewName";
+        product.Name = "NewNewName";
         await _productStorage.Update(product);
 
         product.Manufacturer = new Lazy<Task<Manufacturer>>(Task.FromResult(newManufacturer));
         await _productStorage.Update(product);
         
-        product = (await _productStorage.GetAll()).First(p => p.Guid == product.Guid);
-        oldManufacturer = (await _manufacturerStorage.GetAll()).First(m => m.Guid == oldManufacturer.Guid);
-        newManufacturer = (await _manufacturerStorage.GetAll()).First(m => m.Guid == newManufacturer.Guid);
+        product = await _productStorage.GetByGuid(product.Guid);
+        _testOutputHelper.WriteLine($"New manufacturer guid: {(await product.Manufacturer.Value).Guid}");
+        newManufacturer = await _manufacturerStorage.GetByGuid(newManufacturer.Guid);
         
         Assert.Equal(newManufacturer, await product.Manufacturer.Value);
     }

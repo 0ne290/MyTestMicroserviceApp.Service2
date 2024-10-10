@@ -8,19 +8,28 @@ namespace Storages.Providers.EntityFramework.Implementations;
 
 public class ProductStorage : IProductStorage
 {
-    public ProductStorage(Service2Context dbContext, IManufacturerStorage manufacturerStorage, IWarehouseStorage warehouseStorage)
+    public ProductStorage(Service2Context dbContext)
     {
         _dbContext = dbContext;
         _dbContext.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTrackingWithIdentityResolution;
-        _manufacturerStorage = manufacturerStorage;
-        _warehouseStorage = warehouseStorage;
     }
 
     // Наглядный пример кейса, в котором правильнее использовать внедрение зависимостей через метод. Ну или
     // централизованное ленивое получение зависимостей по требованию, но это уже анти-паттерн "Сервис Локатор"
     public async Task<IEnumerable<Product>> GetAll() =>
-        await Task.FromResult(_dbContext.Products.AsEnumerable().Select(product =>
-            ProductMapper.ModelToEntity(product, _manufacturerStorage, _warehouseStorage)));
+        await Task.FromResult(_dbContext.Products.AsEnumerable().Select(p =>
+            ProductMapper.ModelToEntity(p, GetManufacturerByGuid(p.ManufacturerGuid), GetWarehouseByGuid(p.WarehouseGuid))));
+    
+    public async Task<Product> GetByGuid(string guid)
+    {
+        var product = await _dbContext.Products.SingleAsync(p => p.Guid == guid);
+        return ProductMapper.ModelToEntity(product, GetManufacturerByGuid(product.ManufacturerGuid), GetWarehouseByGuid(product.WarehouseGuid));
+    }
+    
+    private async Task<Manufacturer> GetManufacturerByGuid(string guid) =>
+        ManufacturerMapper.ModelToEntity(await _dbContext.Manufacturers.SingleAsync(m => m.Guid == guid));
+    
+    private async Task<Warehouse> GetWarehouseByGuid(string guid) => WarehouseMapper.ModelToEntity(await _dbContext.Warehouses.SingleAsync(w => w.Guid == guid));
     
     public async Task<Result> Insert(Product product)
     {
@@ -41,8 +50,4 @@ public class ProductStorage : IProductStorage
     }
 
     private readonly Service2Context _dbContext;
-    
-    private readonly IManufacturerStorage _manufacturerStorage;
-    
-    private readonly IWarehouseStorage _warehouseStorage;
 }
