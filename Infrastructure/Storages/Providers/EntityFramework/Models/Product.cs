@@ -9,4 +9,6 @@ public class Product : BaseModel
     public DateTime ReceiptDate { get; set; }
     
     public string WarehouseGuid { get; set; } = null!;
+    
+    public string? SupplyGuid { get; set; }
 }

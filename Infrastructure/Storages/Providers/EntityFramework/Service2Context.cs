@@ -14,7 +14,7 @@ public sealed class Service2Context : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Supply>()
-            .HasMany(s => s.Products)
+            .HasMany<Product>()
             .WithOne()
             .IsRequired(false);
 
@@ -28,12 +28,6 @@ public sealed class Service2Context : DbContext
             .HasMany<Product>()
             .WithOne()
             .HasForeignKey(p => p.WarehouseGuid)
-            .IsRequired();
-
-        modelBuilder.Entity<Warehouse>()
-            .HasMany<Supply>()
-            .WithOne()
-            .HasForeignKey(s => s.WarehouseGuid)
             .IsRequired();
     }
 

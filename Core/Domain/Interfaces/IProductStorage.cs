@@ -7,7 +7,7 @@ public interface IProductStorage
 {
     Task<IEnumerable<Product>> GetAll();
     
-    Task<Product> GetByGuid(string guid);
+    Task<IEnumerable<Product>> GetAllBySupplyGuid(string supplyGuid);
     
     Task<Result> Insert(Product product);
     

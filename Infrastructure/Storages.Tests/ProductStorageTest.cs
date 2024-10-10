@@ -15,7 +15,7 @@ public class ProductStorageTest : IDisposable
             .Options);
         _manufacturerStorage = new ManufacturerStorage(_dbContext);
         _warehouseStorage = new WarehouseStorage(_dbContext);
-        _productStorage = new ProductStorage(_dbContext);
+        _productStorage = new ProductStorage(_dbContext, _manufacturerStorage, _warehouseStorage);
         _faker = new Faker("ru");
     }
     
@@ -77,7 +77,7 @@ public class ProductStorageTest : IDisposable
         product.Manufacturer = new Lazy<Task<Manufacturer>>(Task.FromResult(newManufacturer));
         await _productStorage.Update(product);
         
-        product = await _productStorage.GetByGuid(product.Guid);
+        product = (await _productStorage.GetAll()).First(p => p.Guid == product.Guid);
         newManufacturer = await _manufacturerStorage.GetByGuid(newManufacturer.Guid);
         
         Assert.Equal(newManufacturer, await product.Manufacturer.Value);

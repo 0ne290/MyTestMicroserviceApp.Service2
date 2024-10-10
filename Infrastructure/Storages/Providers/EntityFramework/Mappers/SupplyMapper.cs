@@ -6,8 +6,10 @@ public static class SupplyMapper
 {
     public static Models.Supply EntityToModel(Entities.Supply entity) => new()
     {
-        Guid = entity.Guid, Date = entity.Date, WarehouseGuid = entity.Warehouse.Value.Guid,
-        ExternalStoreGuid = entity.ExternalStoreGuid,
-        //Products = entity.Products.Select(ProductMapper.EntityToModel).ToList()
+        Guid = entity.Guid, Date = entity.Date, ExternalStoreGuid = entity.ExternalStoreGuid
     };
+
+    public static Entities.Supply
+        ModelToEntity(Models.Supply model, Func<Task<IEnumerable<Entities.Product>>> products) => new(model.Guid,
+        model.Date, model.ExternalStoreGuid, new Lazy<Task<IEnumerable<Entities.Product>>>(products));
 }
