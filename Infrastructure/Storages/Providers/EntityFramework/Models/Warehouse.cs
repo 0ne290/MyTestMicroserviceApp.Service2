@@ -11,8 +11,4 @@ public class Warehouse : BaseModel
     public double GeolocationLongitude { get; set; }
     
     public double GeolocationLatitude { get; set; }
-    
-    //public virtual ICollection<Product> Products { get; set; } = new List<Product>();
-    
-    //public virtual ICollection<Supply> Supplies { get; set; } = new List<Supply>();
 }

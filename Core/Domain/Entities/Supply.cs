@@ -1,19 +1,21 @@
+using FluentResults;
+
 namespace Domain.Entities;
 
-public class Supply(string guid, DateTime date, Lazy<Warehouse> warehouse, string externalStoreGuid,
-    Lazy<IEnumerable<Product>> products) : BaseEntity(guid)
+public class Supply(string guid, DateTime date, Lazy<Task<Warehouse>> warehouse, string externalStoreGuid,
+    Lazy<Task<IEnumerable<Product>>> products) : BaseEntity(guid)
 {
-    public bool AddProduct(Product product) => _products.Value.Add(product);
-    
-    public bool RemoveProduct(Product product) => _products.Value.Remove(product);
+    public async Task<IReadOnlyCollection<Product>> GetProducts() => await _products.Value;
+
+    public async Task<Result> AddProduct(Product product) => (await _products.Value).Add(product)
+        ? Result.Ok()
+        : Result.Fail($"The product {product.Guid} is already included in the supply.");
     
     public DateTime Date { get; } = date;
 
-    public Lazy<Warehouse> Warehouse { get; } = warehouse;
+    public Lazy<Task<Warehouse>> Warehouse { get; } = warehouse;
 
     public string ExternalStoreGuid { get; } = externalStoreGuid;
 
-    public IReadOnlyCollection<Product> Products => _products.Value;
-
-    private readonly Lazy<HashSet<Product>> _products = new(() => new HashSet<Product>(products.Value));
+    private readonly Lazy<Task<HashSet<Product>>> _products = new(async () => new HashSet<Product>(await products.Value));
 }

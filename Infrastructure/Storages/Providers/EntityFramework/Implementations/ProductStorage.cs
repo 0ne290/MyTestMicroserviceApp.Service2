@@ -16,14 +16,14 @@ public class ProductStorage : IProductStorage
 
     // Наглядный пример кейса, в котором правильнее использовать внедрение зависимостей через метод. Ну или
     // централизованное ленивое получение зависимостей по требованию, но это уже анти-паттерн "Сервис Локатор"
-    public async Task<IEnumerable<Product>> GetAll() =>
-        await Task.FromResult(_dbContext.Products.AsEnumerable().Select(p =>
-            ProductMapper.ModelToEntity(p, GetManufacturerByGuid(p.ManufacturerGuid), GetWarehouseByGuid(p.WarehouseGuid))));
+    public async Task<IEnumerable<Product>> GetAll() => (await _dbContext.Products.ToListAsync()).Select(p =>
+        ProductMapper.ModelToEntity(p, async () => await GetManufacturerByGuid(p.ManufacturerGuid),
+            async () => await GetWarehouseByGuid(p.WarehouseGuid)));
     
     public async Task<Product> GetByGuid(string guid)
     {
         var product = await _dbContext.Products.SingleAsync(p => p.Guid == guid);
-        return ProductMapper.ModelToEntity(product, GetManufacturerByGuid(product.ManufacturerGuid), GetWarehouseByGuid(product.WarehouseGuid));
+        return ProductMapper.ModelToEntity(product, async () => await GetManufacturerByGuid(product.ManufacturerGuid), async () => await GetWarehouseByGuid(product.WarehouseGuid));
     }
     
     private async Task<Manufacturer> GetManufacturerByGuid(string guid) =>

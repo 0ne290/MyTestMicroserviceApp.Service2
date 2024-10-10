@@ -3,23 +3,19 @@ using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Storages.Providers.EntityFramework;
 using Storages.Providers.EntityFramework.Implementations;
-using Xunit.Abstractions;
 
 namespace Storages.Tests;
 
 // TODO: Результаты тестирования: протестировать хранилище поставок, провести рефакторинг моделей данных
 public class ProductStorageTest : IDisposable
 {
-    private readonly ITestOutputHelper _testOutputHelper;
-
-    public ProductStorageTest(ITestOutputHelper testOutputHelper)
+    public ProductStorageTest()
     {
-        _testOutputHelper = testOutputHelper;
         _dbContext = new Service2Context(new DbContextOptionsBuilder<Service2Context>().UseSqlite("Data Source=./TestDb.db")
             .Options);
         _manufacturerStorage = new ManufacturerStorage(_dbContext);
         _warehouseStorage = new WarehouseStorage(_dbContext);
-        _productStorage = new ProductStorage(_dbContext, _manufacturerStorage, _warehouseStorage);
+        _productStorage = new ProductStorage(_dbContext);
         _faker = new Faker("ru");
     }
     
@@ -71,7 +67,6 @@ public class ProductStorageTest : IDisposable
     public async Task Successful_Update()
     {
         var product = (await _productStorage.GetAll()).First();
-        _testOutputHelper.WriteLine($"Old manufacturer guid: {(await product.Manufacturer.Value).Guid}");
         var newManufacturer = new Manufacturer(_faker.Random.Guid().ToString(), _faker.Address.FullAddress(),
                     _faker.Company.CompanyName());
         await _manufacturerStorage.Insert(newManufacturer);
@@ -83,7 +78,6 @@ public class ProductStorageTest : IDisposable
         await _productStorage.Update(product);
         
         product = await _productStorage.GetByGuid(product.Guid);
-        _testOutputHelper.WriteLine($"New manufacturer guid: {(await product.Manufacturer.Value).Guid}");
         newManufacturer = await _manufacturerStorage.GetByGuid(newManufacturer.Guid);
         
         Assert.Equal(newManufacturer, await product.Manufacturer.Value);

@@ -6,19 +6,19 @@ using Storages.Providers.EntityFramework.Mappers;
 
 namespace Storages.Providers.EntityFramework.Implementations;
 
-public class ManufacturerStorage : IManufacturerStorage
+public class SupplyStorage : ISupplyStorage
 {
-    public ManufacturerStorage(Service2Context dbContext)
+    public SupplyStorage(Service2Context dbContext)
     {
         _dbContext = dbContext;
         _dbContext.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTrackingWithIdentityResolution;
     }
     
-    public async Task<IEnumerable<Manufacturer>> GetAll() =>
-        (await _dbContext.Manufacturers.ToListAsync()).Select(ManufacturerMapper.ModelToEntity);
+    public async Task<IEnumerable<Supply>> GetAll() =>
+        await Task.FromResult(_dbContext.Manufacturers.AsEnumerable().Select(ManufacturerMapper.ModelToEntityExpression));
 
     public async Task<Manufacturer> GetByGuid(string guid) =>
-        ManufacturerMapper.ModelToEntity(await _dbContext.Manufacturers.SingleAsync(m => m.Guid == guid));
+        ManufacturerMapper.ModelToEntityExpression(await _dbContext.Manufacturers.SingleAsync(m => m.Guid == guid));
     
     public async Task<Result> Insert(Manufacturer manufacturer)
     {

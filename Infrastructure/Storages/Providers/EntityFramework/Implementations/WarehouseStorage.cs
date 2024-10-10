@@ -7,17 +7,18 @@ using Storages.Providers.EntityFramework.Mappers;
 namespace Storages.Providers.EntityFramework.Implementations;
 
 public class WarehouseStorage : IWarehouseStorage
-{ 
+{
     public WarehouseStorage(Service2Context dbContext)
     {
         _dbContext = dbContext;
         _dbContext.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTrackingWithIdentityResolution;
     }
-    
-    public async Task<IEnumerable<Warehouse>> GetAll() =>
-        await Task.FromResult(_dbContext.Warehouses.AsEnumerable().Select(WarehouseMapper.ModelToEntity));
 
-    public async Task<Warehouse> GetByGuid(string guid) => WarehouseMapper.ModelToEntity(await _dbContext.Warehouses.SingleAsync(w => w.Guid == guid));
+    public async Task<IEnumerable<Warehouse>> GetAll() =>
+        (await _dbContext.Warehouses.ToListAsync()).Select(WarehouseMapper.ModelToEntity);
+
+    public async Task<Warehouse> GetByGuid(string guid) =>
+        WarehouseMapper.ModelToEntity(await _dbContext.Warehouses.SingleAsync(w => w.Guid == guid));
     
     public async Task<Result> Insert(Warehouse warehouse)
     {
