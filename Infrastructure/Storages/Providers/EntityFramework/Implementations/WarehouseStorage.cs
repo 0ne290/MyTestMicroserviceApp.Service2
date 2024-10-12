@@ -20,6 +20,15 @@ public class WarehouseStorage : IWarehouseStorage
     public async Task<Warehouse> GetByGuid(string guid) =>
         WarehouseMapper.ModelToEntity(await _dbContext.Warehouses.SingleAsync(w => w.Guid == guid));
     
+    public async Task<bool> ExistsByGuid(string guid) => await _dbContext.Warehouses.AnyAsync(w => w.Guid == guid);
+
+    public async Task<bool> ExistsByGeolocation((double Longitude, double Latitude) geolocation) =>
+        await _dbContext.Warehouses.AnyAsync(w =>
+            Math.Abs(w.GeolocationLongitude - geolocation.Longitude) < 0.000001 &&
+            Math.Abs(w.GeolocationLatitude - geolocation.Latitude) < 0.000001);
+
+    public async Task<bool> ExistsByAddress(string address) => await _dbContext.Warehouses.AnyAsync(w => w.Address == address);
+
     public async Task<Result> Insert(Warehouse warehouse)
     {
         await _dbContext.Warehouses.AddAsync(WarehouseMapper.EntityToModel(warehouse));

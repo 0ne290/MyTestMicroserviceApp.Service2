@@ -15,14 +15,20 @@ public class SupplyStorage : ISupplyStorage
         _productStorage = productStorage;
     }
     
-    public async Task<IEnumerable<Supply>> GetAll() => (await _dbContext.Supplies.ToListAsync()).Select(s =>
-        SupplyMapper.ModelToEntity(s, async () => await _productStorage.GetAllBySupplyGuid(s.Guid)));
-    
+    public async Task<IEnumerable<Supply>> GetAll() => (await _dbContext.Supplies.ToListAsync()).Select(s => SupplyMapper.ModelToEntity(s, async () => await _productStorage.GetAllBySupplyGuid(s.Guid)));
+
+    public async Task<Supply> GetByGuid(string guid)
+    {
+        var supply = await _dbContext.Supplies.FirstAsync(s => s.Guid == guid);
+
+        return SupplyMapper.ModelToEntity(supply, async () => await _productStorage.GetAllBySupplyGuid(supply.Guid));
+    }
+
     public async Task<Result> Insert(Supply supply)
     {
-        await _dbContext.Supplies.AddAsync(SupplyMapper.EntityToModel(supply));
+        await _dbContext.Supplies.AddAsync(await SupplyMapper.EntityToModel(supply));
         foreach (var product in await supply.GetProducts())
-            _dbContext.Update(await ProductMapper.EntityToModel(product, supply.Guid));
+            _dbContext.Update(await ProductMapper.EntityToModel(product));
         await _dbContext.SaveChangesAsync();
         _dbContext.ChangeTracker.Clear();
         
@@ -31,7 +37,7 @@ public class SupplyStorage : ISupplyStorage
 
     public async Task<Result> Update(Supply supply)
     {
-        _dbContext.Update(SupplyMapper.EntityToModel(supply));
+        _dbContext.Update(await SupplyMapper.EntityToModel(supply));
         await _dbContext.SaveChangesAsync();
         _dbContext.ChangeTracker.Clear();
         

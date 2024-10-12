@@ -19,7 +19,14 @@ public class ManufacturerStorage : IManufacturerStorage
 
     public async Task<Manufacturer> GetByGuid(string guid) =>
         ManufacturerMapper.ModelToEntity(await _dbContext.Manufacturers.SingleAsync(m => m.Guid == guid));
-    
+
+    public async Task<bool> ExistsByGuid(string guid) => await _dbContext.Manufacturers.AnyAsync(m => m.Guid == guid);
+
+    public async Task<bool> ExistsByAddress(string address) =>
+        await _dbContext.Manufacturers.AnyAsync(m => m.Address == address);
+
+    public async Task<bool> ExistsByName(string name) => await _dbContext.Manufacturers.AnyAsync(m => m.Name == name);
+
     public async Task<Result> Insert(Manufacturer manufacturer)
     {
         await _dbContext.Manufacturers.AddAsync(ManufacturerMapper.EntityToModel(manufacturer));

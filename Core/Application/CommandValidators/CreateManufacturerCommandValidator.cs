@@ -1,13 +1,16 @@
 using Application.Commands;
+using Domain.Interfaces;
 using FluentValidation;
 
 namespace Application.CommandValidators;
 
 public class CreateManufacturerCommandValidator : AbstractValidator<CreateManufacturerCommand>
 {
-    public CreateManufacturerCommandValidator()
+    public CreateManufacturerCommandValidator(IManufacturerStorage manufacturerStorage)
     {
-        RuleFor(c => c.Address).NotEmpty();
-        RuleFor(c => c.Name).NotEmpty();
+        RuleFor(c => c.Address).NotEmpty().WithMessage("Name must not be empty.");
+        RuleFor(c => c.Name).NotEmpty().WithMessage("Address must not be empty.");
+        RuleFor(c => c.Name).MustAsync(async (address, _) => !await manufacturerStorage.ExistsByAddress(address)).WithMessage("Manufacturer with the specified address already exists.");
+        RuleFor(c => c.Address).MustAsync(async (address, _) => !await manufacturerStorage.ExistsByAddress(address)).WithMessage("Manufacturer with the specified address already exists.");
     }
 }
