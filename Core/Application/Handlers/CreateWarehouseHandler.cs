@@ -7,14 +7,26 @@ namespace Application.Handlers;
 
 public class CreateWarehouseHandler : IRequestHandler<CreateWarehouseCommand, Result>
 {
+    public CreateWarehouseHandler(IWarehouseStorage warehouseStorage, IValidator<CreateWarehouseCommand> requestValidator)
+    {
+        _warehouseStorage = warehouseStorage;
+        _requestValidator = requestValidator;
+    }
+
     public async Task<Result> Handle(CreateWarehouseCommand request, CancellationToken cancellationToken)
     {
-        var model = new AnyModel(request.AnyItem);
-        var modelValidator = new AnyModelValidator();
-        var validationResult = modelValidator.Validate(model);
+        var validationResult = await _requestValidator.ValidateAsync(request);
+        
+        if (validationResult.IsValid)
+        {
+            await _warehouseStorage.Insert(new Warehouse(Guid.NewGuid().ToString(), request.Address, (request.GeolocationLongitude, request.GeolocationLatitude)));
+            return Result.Ok();
+        }
 
-        return await Task.FromResult(!validationResult.IsValid
-            ? Result.Fail(validationResult.ToString("; "))
-            : modelStorage.Add(model));
+        return Result.Fail(validationResult.ToString(" "));
     }
+
+    private readonly IWarehouseStorage _warehouseStorage;
+
+    private readonly IValidator<CreateWarehouseCommand> _requestValidator
 }
