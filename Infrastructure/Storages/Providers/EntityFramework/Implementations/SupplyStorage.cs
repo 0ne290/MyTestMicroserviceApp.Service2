@@ -26,7 +26,7 @@ public class SupplyStorage : ISupplyStorage
 
     public async Task<Result> Insert(Supply supply)
     {
-        await _dbContext.Supplies.AddAsync(await SupplyMapper.EntityToModel(supply));
+        await _dbContext.Supplies.AddAsync(SupplyMapper.EntityToModel(supply));
         foreach (var product in await supply.GetProducts())
             _dbContext.Update(await ProductMapper.EntityToModel(product));
         await _dbContext.SaveChangesAsync();
@@ -37,7 +37,7 @@ public class SupplyStorage : ISupplyStorage
 
     public async Task<Result> Update(Supply supply)
     {
-        _dbContext.Update(await SupplyMapper.EntityToModel(supply));
+        _dbContext.Update(SupplyMapper.EntityToModel(supply));
         await _dbContext.SaveChangesAsync();
         _dbContext.ChangeTracker.Clear();
         

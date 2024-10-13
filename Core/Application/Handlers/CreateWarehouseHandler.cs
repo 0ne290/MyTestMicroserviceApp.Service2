@@ -1,6 +1,8 @@
 using Application.Commands;
+using Domain.Entities;
 using Domain.Interfaces;
 using FluentResults;
+using FluentValidation;
 using MediatR;
 
 namespace Application.Handlers;
@@ -15,18 +17,16 @@ public class CreateWarehouseHandler : IRequestHandler<CreateWarehouseCommand, Re
 
     public async Task<Result> Handle(CreateWarehouseCommand request, CancellationToken cancellationToken)
     {
-        var validationResult = await _requestValidator.ValidateAsync(request);
-        
-        if (validationResult.IsValid)
-        {
-            await _warehouseStorage.Insert(new Warehouse(Guid.NewGuid().ToString(), request.Address, (request.GeolocationLongitude, request.GeolocationLatitude)));
-            return Result.Ok();
-        }
+        var validationResult = await _requestValidator.ValidateAsync(request, cancellationToken);
 
-        return Result.Fail(validationResult.ToString(" "));
+        if (!validationResult.IsValid)
+            return Result.Fail(validationResult.ToString(" "));
+        
+        await _warehouseStorage.Insert(new Warehouse(Guid.NewGuid().ToString(), request.Address, (request.GeolocationLongitude, request.GeolocationLatitude)));
+        return Result.Ok();
     }
 
     private readonly IWarehouseStorage _warehouseStorage;
 
-    private readonly IValidator<CreateWarehouseCommand> _requestValidator
+    private readonly IValidator<CreateWarehouseCommand> _requestValidator;
 }

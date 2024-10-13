@@ -1,6 +1,5 @@
 using Application.Commands;
 using Domain.Interfaces;
-using FluentResults;
 using FluentValidation;
 
 namespace Application.CommandValidators;
