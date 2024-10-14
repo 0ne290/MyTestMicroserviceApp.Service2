@@ -16,6 +16,4 @@ public interface IWarehouseStorage
     Task<bool> ExistsByAddress(string address);
     
     Task<Result> Insert(Warehouse warehouse);
-    
-    Task<Result> Update(Warehouse warehouse);
 }

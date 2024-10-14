@@ -1,31 +1,39 @@
 syntax = "proto3";
  
-option csharp_namespace = "MyTestMicroserviceApp.gRpcClientTestStubForService2";
+option csharp_namespace = "MyTestMicroserviceApp.ServerOfgRpcService2";
  
 package warehouse_accounting_service;
  
 service Service2 {
-  rpc GetNearestWarehouseGuidByPoint(Point) returns (WarehouseGuid);
+  rpc GetNearestWarehouseByGeolocation(Geolocation) returns (Warehouse);
   
-  rpc GetAllProductsInWarehouse(WarehouseGuid) returns (Products);
+  rpc GetAllProductsByWarehouseGuid(WarehouseGuid) returns (Products);
 }
  
-message Point {
-  double latitude = 1;
-  
-  double longitude = 2;
+message Geolocation {
+  double longitude = 1;
+
+  double latitude = 2;
 }
  
+message Warehouse {
+  string address = 1;
+  
+  double geolocationLongitude = 2;
+  
+  double geolocationLatitude = 3;
+}
+
 message WarehouseGuid {
   string value = 1;
 }
 
 message Product {
   string guid = 1;
-
-  string name = 2;
   
-  int32 quantity = 3;
+  string warehouseGuid = 2;
+
+  string name = 3;
 }
  
 message Products {
