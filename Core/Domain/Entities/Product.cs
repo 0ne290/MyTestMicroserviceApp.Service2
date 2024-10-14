@@ -11,5 +11,5 @@ public class Product(string guid, string name, Lazy<Task<Manufacturer>> manufact
 
     public Lazy<Task<Warehouse>> Warehouse{ get; } = warehouse;
     
-    public Lazy<Task<Supply>>? Supply{ get; init; }
+    public Lazy<Task<Supply>>? Supply{ get; set; }
 }

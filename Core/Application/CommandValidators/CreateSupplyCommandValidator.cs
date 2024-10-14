@@ -12,7 +12,10 @@ public class CreateSupplyCommandValidator : AbstractValidator<CreateSupplyComman
             .CustomAsync(async (productGuids, context, _) =>
             {
                 if (productGuids.Count == 0)
+                {
                     context.AddFailure("The supply must contain at least one product.");
+                    return;
+                }
                 
                 var products = (await productStorage.GetAllByGuids(productGuids)).ToList();
                 
