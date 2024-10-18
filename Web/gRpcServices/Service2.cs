@@ -23,7 +23,7 @@ public class Service2 : MyTestMicroserviceApp.ServerOfgRpcService2.Service2.Serv
 
         return new Warehouse
         {
-            Address = result.Value.Address, GeolocationLongitude = result.Value.GeolocationLongitude,
+            Guid = result.Value.Guid, Address = result.Value.Address, GeolocationLongitude = result.Value.GeolocationLongitude,
             GeolocationLatitude = result.Value.GeolocationLatitude
         };
     }

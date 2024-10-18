@@ -17,11 +17,13 @@ message Geolocation {
 }
  
 message Warehouse {
-  string address = 1;
+  string guid = 1;
+
+  string address = 2;
   
-  double geolocationLongitude = 2;
+  double geolocationLongitude = 3;
   
-  double geolocationLatitude = 3;
+  double geolocationLatitude = 4;
 }
 
 message WarehouseGuid {

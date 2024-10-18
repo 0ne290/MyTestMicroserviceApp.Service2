@@ -19,6 +19,8 @@ public static class ServicesExtension
         services.AddScoped<IValidator<CreateWarehouseCommand>, CreateWarehouseCommandValidator>();
         services.AddScoped<IValidator<CreateProductCommand>, CreateProductCommandValidator>();
         services.AddScoped<IValidator<CreateSupplyCommand>, CreateSupplyCommandValidator>();
+        services.AddScoped<IValidator<GetAllProductsByWarehouseGuidCommand>, GetAllProductsByWarehouseGuidCommandValidator>();
+        services.AddScoped<IValidator<GetNearestWarehouseByGeolocationCommand>, GetNearestWarehouseByGeolocationCommandValidator>();
         
         services.AddScoped<IManufacturerStorage, ManufacturerStorage>();
         services.AddScoped<IWarehouseStorage, WarehouseStorage>();
@@ -26,6 +28,10 @@ public static class ServicesExtension
         services.AddScoped<ISupplyStorage, SupplyStorage>();
         
         services.AddDbContext<Service2Context>(options => options.UseSqlite(connectionString));
+
+        var dbContextOptionsBuilder = new DbContextOptionsBuilder<Service2Context>();
+        dbContextOptionsBuilder.UseSqlite(connectionString);
+        var dbContext = new Service2Context(dbContextOptionsBuilder.Options);
         
         return services;
     }
