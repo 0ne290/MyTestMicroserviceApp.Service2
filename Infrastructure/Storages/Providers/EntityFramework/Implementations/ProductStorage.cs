@@ -18,6 +18,12 @@ public class ProductStorage : IProductStorage
         ProductMapper.ModelToEntity(p, async () => await GetManufacturerByGuid(p.ManufacturerGuid),
             async () => await GetWarehouseByGuid(p.WarehouseGuid), p.SupplyGuid == null ? null : async () => await GetSupplyByGuid(p.SupplyGuid)));
 
+    public async Task<IEnumerable<Product>> GetAllByWarehouseGuid(string warehouseGuid) =>
+        (await _dbContext.Products.Where(p => p.WarehouseGuid == warehouseGuid).ToListAsync()).Select(p =>
+            ProductMapper.ModelToEntity(p, async () => await GetManufacturerByGuid(p.ManufacturerGuid),
+                async () => await GetWarehouseByGuid(p.WarehouseGuid),
+                p.SupplyGuid == null ? null : async () => await GetSupplyByGuid(p.SupplyGuid)));
+
     public async Task<IEnumerable<Product>> GetAllByGuids(IEnumerable<string> guids) =>
         (await _dbContext.Products.Where(p => guids.Contains(p.Guid)).ToListAsync()).Select(p =>
             ProductMapper.ModelToEntity(p, async () => await GetManufacturerByGuid(p.ManufacturerGuid),

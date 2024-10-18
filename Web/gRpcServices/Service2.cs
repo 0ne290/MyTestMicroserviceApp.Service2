@@ -30,9 +30,18 @@ public class Service2 : MyTestMicroserviceApp.ServerOfgRpcService2.Service2.Serv
     
     public override async Task<Products> GetAllProductsByWarehouseGuid(WarehouseGuid warehouseGuid, ServerCallContext context)
     {
-        throw new NotImplementedException();
+        var result = await _mediator.Send(new GetAllProductsByWarehouseGuidCommand
+            { WarehouseGuid = warehouseGuid.Value });
         
-        await Task.CompletedTask;
+        if (result.IsFailed)
+            throw new RpcException(new Status(StatusCode.InvalidArgument, result.ErrorsToJson()));
+        
+        var ret = new Products();
+        foreach (var product in result.Value)
+            ret.Values.Add(new Product
+                { Guid = product.Guid, Name = product.Name, WarehouseGuid = product.WarehouseGuid });
+
+        return ret;
     }
 
     private readonly IMediator _mediator;
