@@ -11,7 +11,7 @@ namespace Application.Extensions;
 
 public static class ServicesExtension
 {
-    public static IServiceCollection AddApplicationServices(this IServiceCollection services, string connectionString)
+    public static async Task<IServiceCollection> AddApplicationServices(this IServiceCollection services, string connectionString)
     {
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CreateProductCommand).Assembly));
         
@@ -32,6 +32,8 @@ public static class ServicesExtension
         var dbContextOptionsBuilder = new DbContextOptionsBuilder<Service2Context>();
         dbContextOptionsBuilder.UseSqlite(connectionString);
         var dbContext = new Service2Context(dbContextOptionsBuilder.Options);
+        await Service2Context.EnsureCreatedAndLoadTestData(dbContext);
+        await dbContext.DisposeAsync();
         
         return services;
     }
