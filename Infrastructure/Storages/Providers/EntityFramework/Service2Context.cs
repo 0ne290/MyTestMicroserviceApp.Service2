@@ -43,6 +43,7 @@ public sealed class Service2Context : DbContext
         await dbContext.Warehouses.AddRangeAsync(warehouses);
         await dbContext.Manufacturers.AddRangeAsync(manufacturers);
         await dbContext.Products.AddRangeAsync(products);
+        await dbContext.SaveChangesAsync();
     }
 
     public Service2Context(DbContextOptions<Service2Context> options) : base(options) { }
