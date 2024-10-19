@@ -34,7 +34,7 @@ internal static class Program
             
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddApplicationServices(builder.Configuration.GetConnectionString("Sqlite") ?? throw new Exception("Connection string not found in config file."));
+            await builder.Services.AddApplicationServices(builder.Configuration.GetConnectionString("Sqlite") ?? throw new Exception("Connection string not found in config file."));
             builder.Services.AddSerilog();
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddControllersWithViews().AddNewtonsoftJson();
